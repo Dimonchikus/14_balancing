@@ -1,0 +1,74 @@
+version: '3'
+
+services:
+  nginx:
+    build: .
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./GeoLite2-Country.mmdb:/usr/share/GeoIP/GeoLite2-Country.mmdb:ro
+    ports:
+    - "80:80"
+    depends_on:
+      - uk_server
+      - us_server_1
+      - us_server_2
+      - rest_server
+      - backup_server
+    networks:
+      - webnet
+
+  uk_server:
+    image: nginx:alpine
+    volumes:
+      - ./html/uk:/usr/share/nginx/html
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/ || exit 1"]
+      interval: 5s
+      retries: 3
+    networks:
+      - webnet
+
+  us_server_1:
+    image: nginx:alpine
+    volumes:
+      - ./html/us1:/usr/share/nginx/html
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/ || exit 1"]
+      interval: 5s
+      retries: 3
+    networks:
+      - webnet
+
+  us_server_2:
+    image: nginx:alpine
+    volumes:
+      - ./html/us2:/usr/share/nginx/html
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/ || exit 1"]
+      interval: 5s
+      retries: 3
+    networks:
+      - webnet
+
+  rest_server:
+    image: nginx:alpine
+    volumes:
+      - ./html/rest:/usr/share/nginx/html
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/ || exit 1"]
+      interval: 5s
+      retries: 3
+    networks:
+      - webnet
+
+  backup_server:
+    image: nginx:alpine
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/ || exit 1"]
+      interval: 5s
+      retries: 3
+    networks:
+      - webnet
+
+networks:
+  webnet:
